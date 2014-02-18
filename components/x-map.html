@@ -1,19 +1,15 @@
+<script src="http://cdn.leafletjs.com/leaflet-0.6.3/leaflet.js"></script>
+<link rel="import" href="../polymer/polymer.html" />
+
+
 <polymer-element name="x-map" attributes="width height lat lng zoom credit">
 
     <template>
         <div id="map"></div>
         <style type="text/css">
-            @import url("http://cdn.leafletjs.com/leaflet-0.6.3/leaflet.css");
-            @host {
-                * {
-                    display: block;
-                    width: {{width}}px;
-                    height: {{height}}px;
-                }
-            }
-            #map {
-                    width: {{width}}px;
-                    height: {{height}}px;
+            @import url("leaflet.css");
+            :host: {
+                display: block;
             }
         </style>
     </template>
@@ -24,6 +20,9 @@
             map: null,
             zoom: 12,
             credit: "",
+            observe: {
+                'width height': 'updateSize'
+            },
             ready: function() {
                 console.log(this.height)
                 if(!this.height)
@@ -32,8 +31,6 @@
                     console.error("lat and lng attributes are required for x-map");
                     return;
                 }
-                this.draw(this.$.map);
-                this.dispatchEvent(new Event('ready'));
             },
             draw: function(element) {
                 var tile = L.tileLayer(
@@ -43,6 +40,14 @@
                 );
                 this.map = L.map(element).setView([this.lat, this.lng], this.zoom);
                 tile.addTo(this.map);
+            },
+            updateSize: function() {
+                this.style.width = this.$.map.style.width = this.width + 'px';
+                this.style.height = this.$.map.style.height = this.height + 'px';
+                if (!this.map) {
+                    this.draw(this.$.map);
+                    this.dispatchEvent(new Event('ready'));
+                }
             }
 
         });
